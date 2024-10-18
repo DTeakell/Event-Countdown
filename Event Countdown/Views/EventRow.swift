@@ -8,11 +8,28 @@
 import SwiftUI
 
 struct EventRow: View {
+    let event: Event
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        VStack (alignment: .leading) {
+            Text(event.title)
+                .font(.headline)
+                .foregroundStyle(event.textColor)
+            
+            Text(event.date.formatted(.relative(presentation: .named)).capitalized)
+                .font(.subheadline)
+                .foregroundStyle(.gray)
+            
+        }
     }
 }
 
 #Preview {
-    EventRow()
+    EventRow(
+        event: Event(
+            title: "Event Name",
+            description: "This is an event",
+            date: .now,
+            textColor: .mint
+        )
+    )
 }

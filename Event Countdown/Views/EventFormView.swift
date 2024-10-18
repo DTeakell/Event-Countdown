@@ -7,57 +7,82 @@
 
 import SwiftUI
 
-struct NewEventView: View {
+struct EventFormView: View {
+    // Environment property to dismiss the sheet
+    @Environment(\.dismiss) private var dismiss
     
-    // Enum to determine which mode the view will take on
-    enum Mode {
-        case add,
-        case edit(Event)
+    // Event to add or edit
+    @State var event: Event
+    
+    // Closure to save the event being added or changed
+    let onSave: (Event) -> Void
+    
+    // Navigation Bar Title
+    @State private var navigationTitle: String
+    
+    // With guidance from Paul Hudson: https://www.hackingwithswift.com/quick-start/beginners/how-to-create-custom-initializers
+    // With guidance from Swift Documentation: https://docs.swift.org/swift-book/documentation/the-swift-programming-language/closures/
+    
+    // Custom intializer used to set the mode of the view
+    // onSave marked as @escaping because the onSave closure is stored and is potentially called later
+    init(mode: Mode, onSave: @escaping (Event) -> Void) {
+        self.onSave = onSave
+        
+        // Switch to run custom init code depending on which mode is being shown
+        switch mode {
+        case .add:
+            // Event with empty data for a new event to be shown
+            _event = State(initialValue: Event(title: "", description: "", date: Date(), textColor: .primary))
+            navigationTitle = "New Event"
+        case .edit(let event):
+            // This is the event that is passed into the view and will be edited
+            _event = State(initialValue: event)
+            navigationTitle = "Edit \"\(event.title)\""
+        }
     }
-    @Binding var events: [Event]
-    @State private var title: String = ""
-    @State private var description: String = ""
-    @State private var date: Date = .now
-    @State private var textColor: Color = .primary
-    @Environment(\.dismiss) var dismiss
+    
+    
     
     var body: some View {
         NavigationStack {
             Form {
-                Section ("Event Name") {
-                    TextField("Title", text: $title)
+                Section("Event Title") {
+                    TextField("Title", text: $event.title)
+                        .tint(event.textColor)
+                        .foregroundStyle(event.textColor)
                 }
                 
                 Section("Event Description") {
-                    TextEditor(text: $description)
+                    TextEditor(text: $event.description)
+                        .tint(event.textColor)
                 }
                 
-                
-                DatePicker("Date", selection: $date)
-                
-                
-                Section ("Style Details") {
-                    ColorPicker("Accent Color", selection: $textColor)
+                Section("Event Date") {
+                    // Show only date because most events are all-day
+                    DatePicker("Date", selection: $event.date, displayedComponents: .date)
+                        .tint(event.textColor)
                 }
                 
+                Section("Style Details") {
+                    ColorPicker("Text Color", selection: $event.textColor)
+                        .tint(event.textColor)
+                }
             }
+            .navigationTitle(navigationTitle)
+            .navigationBarTitleDisplayMode(.inline)
+            .tint(event.textColor)
             .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button ("Add Event") {
-                        events
-                            .append(
-                                Event(
-                                    title: title,
-                                    description: description,
-                                    date: date,
-                                    textColor: textColor
-                                )
-                            )
+                ToolbarItem (placement: .confirmationAction) {
+                    Button("Save") {
+                        onSave(event)
                         dismiss()
+                        
                     }
+                    // Disable the button if the title is empty
+                    .disabled(event.title.isEmpty)
+                    .tint(.mint)
                 }
             }
-            .navigationTitle("New Event")
         }
     }
 }

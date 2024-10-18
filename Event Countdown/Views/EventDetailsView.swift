@@ -8,11 +8,19 @@
 import SwiftUI
 
 struct EventDetailsView: View {
+    
+    let event: Event
+    @State private var title: String = ""
+    @State private var description: String = ""
+    @State private var date: Date = .now
+    @State private var textColor: Color = .primary
+    @Environment(\.dismiss) var dismiss
+    
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+       Text("")
     }
 }
 
 #Preview {
-    EventDetailsView()
+    EventDetailsView(event: Event.MockData().events[0])
 }
