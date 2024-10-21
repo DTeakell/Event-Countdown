@@ -24,7 +24,7 @@ struct EventsView: View {
     var body: some View {
         
         // For iPad layout
-        NavigationSplitView {
+        NavigationStack{
             
             // Show an empty screen if the list is empty
             if events.isEmpty {
@@ -53,7 +53,7 @@ struct EventsView: View {
                             .tint(.red)
                     }
                 }
-        }
+            }
             .navigationTitle("Events")
             .toolbar {
                 // Create new event button
@@ -68,10 +68,8 @@ struct EventsView: View {
             }
             
             //TODO: Add a color picker for the user to select an accent color for the app
-            
-            
-            // For iPad and if there is no event selected
-        } detail: { NoEventSelectedView() }.tint(accentColor)
+        }
+        .tint(.mint)
         
         // Add Event Sheet
             .sheet(isPresented: $isShowingNewEventView) {
