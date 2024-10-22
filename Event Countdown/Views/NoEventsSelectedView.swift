@@ -28,5 +28,5 @@ struct NoEventSelectedView: View {
 }
 
 #Preview {
-    NoEventsView()
+    NoEventSelectedView()
 }

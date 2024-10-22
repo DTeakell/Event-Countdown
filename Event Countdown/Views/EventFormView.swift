@@ -8,11 +8,11 @@
 import SwiftUI
 
 struct EventFormView: View {
-    // Environment property to dismiss the sheet
-    @Environment(\.dismiss) private var dismiss
     
     // Event to add or edit
     @State var event: Event
+    
+    @Environment(\.dismiss) private var dismiss
     
     // Closure to save the event being added or changed
     let onSave: (Event) -> Void
@@ -37,7 +37,7 @@ struct EventFormView: View {
         case .edit(let event):
             // This is the event that is passed into the view and will be edited
             _event = State(initialValue: event)
-            navigationTitle = "Edit \"\(event.title)\""
+            navigationTitle = "Edit \(event.title)"
         }
     }
     
@@ -76,7 +76,6 @@ struct EventFormView: View {
                     Button("Save") {
                         onSave(event)
                         dismiss()
-                        
                     }
                     // Disable the button if the title is empty
                     .disabled(event.title.isEmpty)

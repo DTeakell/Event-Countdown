@@ -9,10 +9,13 @@ import SwiftUI
 
 struct EventsView: View {
     
-    @State var events: [Event] = Event.MockData().events
+    @State var events: [Event] = []
     
-    // Create a new event boolean to show the add event form
-    @State private var isShowingNewEventView: Bool = false
+    // Create a new event boolean to toggle the EventFormView
+    @State private var isAddingNewEvent: Bool = false
+    
+    // Create an event variable to keep track of selected event
+    @State private var selectedEvent: Event? = nil
     
     // Create a edit event boolean to edit an existing event
     @State private var isShowingEditView: Bool = false
@@ -23,62 +26,78 @@ struct EventsView: View {
     
     var body: some View {
         
-        // For iPad layout
-        NavigationStack{
+        NavigationStack {
             
             // Show an empty screen if the list is empty
             if events.isEmpty {
-                NoEventsView()
+                VStack {
+                    NoEventsView()
+                        .padding(.vertical, 20)
+                    NavigationLink(
+                        destination: EventFormView(mode: .add) { event in
+                            withAnimation {
+                                events.append(event)
+                            }
+                        }
+                    ) {
+                        Label("Create Event", systemImage: "plus")
+                    }
+                    .buttonStyle(.borderedProminent)
+                }
+            } else {
+                
+                // List of Events
+                List (events.sorted()) { event in
+                    // Navigate to the EventFormView to edit event
+                    NavigationLink(destination: EventFormView(mode: .edit(event)) { updatedEvent in
+                        if let index = events.firstIndex(where: {$0.id == event.id}) {
+                            events[index] = updatedEvent
+                        }
+                    }) {
+                        EventRow(event: event)
+                    }
+                    
+                    // Swipe action to delete an event
+                    .swipeActions {
+                        Button(role: .destructive) {
+                            withAnimation {
+                                removeEvent(event: event)
+                            }
+                        } label: {
+                            Label("Remove", systemImage: "trash")
+                                .tint(.red)
+                        }
+                    }
+                }
+                .navigationTitle("Events")
+                .toolbar {
+                    // Create new event button
+                    ToolbarItem {
+                        NavigationLink(
+                            destination: EventFormView(mode: .add) { event in
+                                withAnimation {
+                                    events.append(event)
+                                }
+                            }
+                        ) {
+                            Label("Create Event", systemImage: "plus")
+                        }
+                    }
+                }
+                .navigationDestination(for: Event.self) { event in
+                    EventFormView(mode: .edit(event)) { updatedEvent in
+                        if let index = events.firstIndex(where: { $0.id == updatedEvent.id }){
+                            events[index] = updatedEvent
+                        }
+                    }
+                }
             }
             
-            // List of Events
-            List (events) { event in
-                // Navigate to the EventFormView to edit event
-                NavigationLink(destination: EventFormView(mode: .edit(event)) { updatedEvent in
-                    if let index = events.firstIndex(where: {$0.id == event.id}) {
-                        events[index] = updatedEvent
-                    }
-                }) {
-                    EventRow(event: event)
-                }
-                
-                // Swipe action to delete an event
-                .swipeActions {
-                    Button(role: .destructive) {
-                        withAnimation {
-                            removeEvent(event: event)
-                        }
-                    } label: {
-                        Label("Remove", systemImage: "trash")
-                            .tint(.red)
-                    }
-                }
-            }
-            .navigationTitle("Events")
-            .toolbar {
-                // Create new event button
-                ToolbarItem {
-                    Button {
-                        // Toggles the sheet to show
-                        isShowingNewEventView.toggle()
-                    } label: {
-                        Label("New Event", systemImage: "plus")
-                    }
-                }
-            }
             
             //TODO: Add a color picker for the user to select an accent color for the app
         }
         .tint(.mint)
-        
-        // Add Event Sheet
-            .sheet(isPresented: $isShowingNewEventView) {
-                EventFormView(mode: .add) {event in
-                    withAnimation {
-                        events.append(event)
-                    }
-                }
-            }
+            
     }
     
     // Helper Function to remove an event from the list
